@@ -1,0 +1,37 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    // {
+    //   "label": "Coffeescript compilation",
+    //   "type": "shell",
+    //   "command": "coffee -c -o src/js/ src/cfs/*.cfs && npm run start",
+    //   "group": {
+    //     "kind": "build",
+    //     "isDefault": true
+    //   },
+    //   "problemMatcher": [
+    //     "$tsc-watch"
+    //   ]
+    // },
+    {
+      "label": "Webpack dev server task",
+      "type": "npm",
+      "script": "start",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    }
+    // },
+    // {
+    //   "type": "typescript",
+    //   "tsconfig": "tsconfig.json",
+    //   "option": "watch",
+    //   "problemMatcher": [
+    //     "$tsc-watch"
+    //   ]
+    // }
+  ]
+}
