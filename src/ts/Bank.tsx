@@ -17,6 +17,9 @@ import { ActionPane } from "./ActionPane";
 import { AmountDialogBox } from "./AmountDialogBox";
 import { FormEvent } from "react";
 import { AccountForm } from "./AccountForm";
+import * as ReduxStore from "./ReduxStore";
+import { bankReducer } from "./ReduxStore";
+import { createStore } from "redux";
 
 //=================================================================================
 /**
@@ -48,24 +51,31 @@ export enum ActionType {
  * * `withdraw` - `false`
  * * `deposit` - `true`
  */
-export class Action {
-  public type: ActionType;
-  public amt: number;
-  public accountName: string;
-
-  /**
-   * Creates an action.
-   * 
-   * @param type The type of action: `ActionType.Deposit` or `ActionType.Withdraw`
-   * @param amt The amount of money the action uses
-   * @param accountName The target account name of the action
-   */
-  constructor(type: ActionType, amt: number, accountName: string) {
-    this.type = type;
-    this.amt = amt;
-    this.accountName = accountName;
-  }
+export interface Action {
+  type: ActionType;
+  amt: number;
+  accountName: string;
 }
+
+/**
+* Creates an action.
+* 
+* @param type The type of action: `ActionType.Deposit` or `ActionType.Withdraw`
+* @param amt The amount of money the action uses
+* @param accountName The target account name of the action
+*/
+export const newAction = (type: ActionType, amt: number, accountName: string) => {
+  let action = {
+    type: ActionType.Deposit,
+    amt: -1,
+    accountName: ""
+  };
+  action.type = type;
+  action.amt = amt;
+  action.accountName = accountName;
+  return action;
+};
+
 // ================================================================================
 /**
  * Initial state of the application
@@ -89,7 +99,7 @@ const ACCOUNTS: Account[] = [
 /**
  * Application Property type
  */
-interface AppProps {
+export interface AppProps {
   accounts: Account[];
   actiontypes: string[];
 }
@@ -97,7 +107,7 @@ interface AppProps {
 /**
  * Application State type
  */
-class AppState {
+export class AppState {
   accounts: Account[] = [];
 }
 /**
@@ -131,38 +141,10 @@ class Application extends React.Component<AppProps, AppState> {
    * @param incomingAction The incoming action from the form submit
    */
   private handleAction(incomingAction: Action): AppState {
-    let matchingAccounts = filter(
-      this.state.accounts,
-      account => account.name === incomingAction.accountName
-    );
+    // let redux handle the incoming action
+    BankStateStore.dispatch(incomingAction);
 
-    //only considering the first match in case of many -- this should never happen in the first case
-    let matchingAccount = matchingAccounts.length > 0 ? matchingAccounts[0] : null;
-
-    if (!matchingAccount)
-      throw new Error(
-        "The account named " + incomingAction.accountName + " doesn't exist"
-      );
-
-    let currentBal = matchingAccount.balance;
-
-    switch (incomingAction.type) {
-      case ActionType.Deposit:
-        matchingAccount.balance = currentBal + incomingAction.amt;
-        break;
-      case ActionType.Withdraw:
-        matchingAccount.balance = currentBal - incomingAction.amt;
-        break;
-    }
-
-    //# referneces are getting passed along -- not true functional way here
-    let newAppState: AppState = new AppState();
-    newAppState.accounts = this.state.accounts;
-    //# referneces are getting passed along -- not true functional way here
-
-    console.log("New App State:: " + JSON.stringify(newAppState));
-
-    return newAppState;
+    return BankStateStore.getState(); // get the current state after redux is done computing the new state
   }
 
   render() {
@@ -180,8 +162,17 @@ class Application extends React.Component<AppProps, AppState> {
 }
 
 // ================================================================================
+// Store creation logic
+let initialStoreState = new AppState();
+initialStoreState.accounts = ACCOUNTS;
+
+export const BankStateStore = createStore(bankReducer, initialStoreState);
+
 //Rendering logic
 render(
-  <Application accounts={ACCOUNTS} actiontypes={["deposit", "withdraw"]} />,
+  <Application
+    accounts={BankStateStore.getState().accounts}
+    actiontypes={["deposit", "withdraw"]}
+  />,
   jQuery("#root").get(0)
 );

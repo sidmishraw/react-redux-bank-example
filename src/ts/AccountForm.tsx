@@ -13,7 +13,7 @@ import { AccountListing } from "./AccountListing";
 import { ActionPane } from "./ActionPane";
 import { AmountDialogBox } from "./AmountDialogBox";
 import { FormEvent, ChangeEvent, UIEvent } from "react";
-import { Account, Action, ActionType } from "./Bank";
+import { Account, Action, ActionType, newAction } from "./Bank";
 import { Event } from "_debugger";
 
 const { Component } = React;
@@ -60,7 +60,7 @@ export class AccountForm extends Component<AccountFormProps, AccountFormState> {
   private handleFormSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault();
     this.props.formHandler(
-      new Action(
+      newAction(
         this.state.formSelections.actionName.toLowerCase() === "withdraw"
           ? ActionType.Withdraw
           : ActionType.Deposit,
