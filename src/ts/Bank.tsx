@@ -121,8 +121,7 @@ class Application extends React.Component<AppProps, AppState> {
 
   constructor(props: AppProps) {
     super(props);
-    this.state = new AppState();
-    this.state.accounts = this.props.accounts;
+    this.state = BankStateStore.getState(); // initially is the initial-store-state
   }
 
   /**
